@@ -7,3 +7,4 @@ HaskellとScalaでの関数の違いは、以下のサイトを参考にして�
 
 1. [リスト操作関数早見表](http://techlog.mvrck.co.jp/entry/underscore-func/)
 
+ソースディレクトリ：https://github.com/sonoday8/scala-poker/tree/master/src/main/scala/com/example
