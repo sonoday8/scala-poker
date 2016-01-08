@@ -27,7 +27,7 @@ object Hands {
     }
   }
 
-  def mplus[A](a:Option[A], b:Option[A]): Option[A] = {
+  def mplus[A](a:Option[A], b:Option[A]): Option[A] = { 
     a match {
       case Some(x) => Some(x)
       case _ => b
@@ -45,8 +45,6 @@ object Hands {
   def extract[A,B](f:(B)=>A, l:List[B]): List[(A,B)] = {
     l.map(c => (f(c),c))
   }
-  
-
   
   type Hand = List[Card]
   
@@ -75,99 +73,61 @@ object Hands {
 
   //straightFlush :: Hand -> Maybe (PokerHand, Card)
   def straightFlush(h: Hand):Option[(PokerHand, Card)]  = {
-    val st = straightHint(h)
-    st match {
-      case Some(_) => {
-        val fl = flushHint(h)
-        fl match {
-          case Some(_) => {
-            Some(StraightFlush, List(st.get,fl.get).maxBy(_.suit.code))
-          }
-          case None => None
-        }
-      }
-      case None => None
-    }
+    for {
+      c <- straightHint(h)
+      d <- flushHint(h)
+    } yield(StraightFlush, List(c, d).maxBy(_.suit.code))
   }
   
   //fourOfAKind :: Hand -> Maybe (PokerHand, Card)
   def fourOfAKind(h: Hand):Option[(PokerHand, Card)]  = {
-    val a = nOfKindHint(4,h)
-    a match {
-      case Some(_) => Some(FourOfAKind, a.get.flatten.maxBy(_.suit.code))
-      case None => None
-    } 
+    for {
+      cs <- nOfKindHint(4,h)
+    } yield(FourOfAKind, cs.flatten.maxBy(_.suit.code))
   } 
 
 
   //fullHouse :: Hand -> Maybe (PokerHand, Card)
   def fullHouse(h: Hand):Option[(PokerHand, Card)]  = {
-    val cs1 = nOfKindHint(3,h)
-    cs1 match {
-      case Some(_) => {
-        val cs2 = nOfKindHint(2,h)
-        cs2 match {
-          case Some(_) => {
-            val ls = cs1.get.flatten ++ cs2.get.flatten
-            Some(FullHouse, ls.maxBy(_.suit.code))
-          }
-          case None => None
-        }
-      }
-     case None => None
-    }
+    for {
+      cs <- nOfKindHint(3,h)
+      _ <- nOfKindHint(2,h)
+    } yield(FullHouse, cs.flatten.maxBy(_.suit.code))
   } 
 
   //flush :: Hand -> Maybe (PokerHand, Card)
   def flush(h: Hand):Option[(PokerHand, Card)]  = {
-    val a = flushHint(h)
-    a match {
-      case Some(_) => Some(Flush, a.get)
-      case None => None
-    } 
-  } 
+    for {
+      cs <- flushHint(h)
+    } yield(Flush, cs)
+} 
 
   //straight :: Hand -> Maybe (PokerHand, Card)
   def straight(h: Hand):Option[(PokerHand, Card)]  = {
-    val a = straightHint(h)
-    a match {
-      case Some(_) => Some(Flush, a.get)
-      case None => None
-    } 
+    for {
+      cs <- straightHint(h)
+    } yield(Straight, cs)
   } 
 
   //threeOfAKind :: Hand -> Maybe (PokerHand, Card)
   def threeOfAKind(h: Hand):Option[(PokerHand, Card)]  = {
-    val a = nOfKindHint(3,h)
-    a match {
-      case Some(_) => Some(Flush, a.get.flatten.maxBy(_.suit.code))
-      case None => None
-    } 
+    for {
+      cs <- nOfKindHint(3,h)
+    } yield(ThreeOfAKind, cs.flatten.maxBy(_.suit.code))
   } 
 
   //twoPair :: Hand -> Maybe (PokerHand, Card)
   def twoPair(h: Hand):Option[(PokerHand, Card)]  = {
-    val cs = nOfKindHint(2,h)
-    cs match {
-      case Some(_) => {
-        if (cs.get.length == 2) {
-          Some(TwoPair, cs.get.flatten.maxBy(_.suit.code))
-        }else{
-          None
-        }
-      }
-      case None => None
-    }
+    for {
+      cs <- nOfKindHint(2,h)
+    } yield(TwoPair, cs.flatten.maxBy(_.suit.code))
   } 
 
   //onePair :: Hand -> Maybe (PokerHand, Card)
   def onePair(h: Hand):Option[(PokerHand, Card)]  = {
-    val a = nOfKindHint(2,h)
-    a match {
-      case Some(_) => Some(OnePair,a.get.flatten.maxBy(_.suit.code))
-      case None => None
-    }
-    
+    for {
+      cs <- nOfKindHint(2,h)
+    } yield(OnePair,cs.flatten.maxBy(_.suit.code))
   } 
 
   def toHand(cards: List[Card]): Option[Hand] = {
@@ -178,11 +138,7 @@ object Hands {
     }
   }
   
-  /**
-   *flushHint :: Hand -> Maybe Card
-  flushHint (Hand (x:xs)) = 
-    if all ((cardSuit x==).cardSuit) xs then Just (last xs) else Nothing 
-   */
+  //flushHint :: Hand -> Maybe Card
   def flushHint(h:Hand): Option[Card] = {
     h match {
       case (x::xs) => {

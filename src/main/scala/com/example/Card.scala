@@ -17,9 +17,9 @@ object Card {
     }
   }
   
-  def allCards: IndexedSeq[Card] = {
+  def allCards: List[Card] = {
     for {
-      s <- Suit.values
+      s <- Suit.values.toList
       i <- 2 to 14
     }  yield Card(i, s)
   }
