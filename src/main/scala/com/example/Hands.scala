@@ -3,13 +3,13 @@ package com.example
 import com.example.PokerHand._
 
 object Hands {
-  def groupBy[A](f: (A, A) => Boolean, lst:List[A]): List[List[A]] ={
-    def span[A](f: (A) => Boolean, lst:List[A]): (List[A],List[A]) = {
+  def groupBy[A](f: (A, A) => Boolean, lst:Seq[A]): Seq[Seq[A]] ={
+    def span[A](f: (A) => Boolean, lst:Seq[A]): (Seq[A],Seq[A]) = {
       lst match {
         case (x :: xs) => {
           if (f(x)) {
             val (ys,zs) = span(f,xs)
-            (x::ys,zs)
+            (x+:ys,zs)
           } else {
             (Nil,lst)
           }
@@ -21,9 +21,9 @@ object Hands {
       case (x :: xs) => {
         //val fcurried = f.curried
         val (ys,zs) = span(f.curried(x),xs)
-        (x::ys)::(groupBy(f,zs))
+        (x+:ys)+:(groupBy(f,zs))
       }
-      case _ => List(Nil)
+      case _ => Seq(Nil)
     }
   }
 
@@ -42,15 +42,15 @@ object Hands {
     x._2
   }
   //extract :: (b -> a) -> [b] -> [(a, b)]
-  def extract[A,B](f:(B)=>A, l:List[B]): List[(A,B)] = {
+  def extract[A,B](f:(B)=>A, l:Seq[B]): Seq[(A,B)] = {
     l.map(c => (f(c),c))
   }
   
-  type Hand = List[Card]
+  type Hand = Seq[Card]
   
   //pokerHand :: Hand -> (PokerHand, Card)
   def pokerHand(h:Hand):(PokerHand, Card) = {
-    val hands = List(straightFlush(h)
+    val hands = Seq(straightFlush(h)
         , fourOfAKind(h)
       , fullHouse(h)
       , flush(h)
@@ -76,7 +76,7 @@ object Hands {
     for {
       c <- straightHint(h)
       d <- flushHint(h)
-    } yield(StraightFlush, List(c, d).maxBy(_.suit.code))
+    } yield(StraightFlush, Seq(c, d).maxBy(_.suit.code))
   }
   
   //fourOfAKind :: Hand -> Maybe (PokerHand, Card)
@@ -130,7 +130,7 @@ object Hands {
     } yield(OnePair,cs.flatten.maxBy(_.suit.code))
   } 
 
-  def toHand(cards: List[Card]): Option[Hand] = {
+  def toHand(cards: Seq[Card]): Option[Hand] = {
     if (cards.length == 5) {
       Some(cards.sortWith((o1, o2) => (o1.suit.code < o2.suit.code) && (o1.n < o2.n)))
     } else {
@@ -160,9 +160,9 @@ object Hands {
       cards = filter ((==n).length) 
         $ groupBy (\x y -> cardNumber x == cardNumber y) h
    */
-  def nOfKindHint(n:Int, h:Hand): Option[List[List[Card]]] = {
-    def cards(h:Hand): List[List[Card]] = {
-      groupBy(((x:Card, y:Card)=> x.n == y.n),h).filter{x:List[Card] => x.length == n}
+  def nOfKindHint(n:Int, h:Hand): Option[Seq[Seq[Card]]] = {
+    def cards(h:Hand): Seq[Seq[Card]] = {
+      groupBy(((x:Card, y:Card)=> x.n == y.n),h).filter{x:Seq[Card] => x.length == n}
     }
     val _cards = cards(h)
     if(_cards != Nil) {
@@ -191,14 +191,14 @@ straightHint (Hand l) =
 */
   def straightHint(h:Hand):Option[Card] = {
     //isStraight :: [Int] -> Bool
-    def isStraight(xs:List[Int]): Boolean = {
+    def isStraight(xs:Seq[Int]): Boolean = {
       xs match {
         case (x::_) => (xs == (x to (x+4)))
         case _ => false
       } 
     }
     //judgeStraight :: [(Int, Card)] -> Maybe Card
-    def judgeStraight(l:List[(Int, Card)]): Option[Card] = {
+    def judgeStraight(l:Seq[(Int, Card)]): Option[Card] = {
       if (isStraight(l.map(fst))) {
         Some(snd(l.last))
       } else {
