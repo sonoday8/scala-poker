@@ -9,6 +9,25 @@ HaskellとScalaでの関数の違いは、以下のサイトを参考にして�
 
 ソースディレクトリ：https://github.com/sonoday8/scala-poker/tree/master/src/main/scala/com/example
 
+実行方法
+
+activator run
+
+以下のような表示になるので
+
+ Multiple main classes detected, select one to run:
+
+
+  [1] com.example.Hello
+
+  [2] com.example.Main
+
+
+ Enter number: 2
+
+2を選ぶ
+
 TODO: 
+
 　１．do記法部分をパターンマッチで書いてしまっているので、forに変更
 
